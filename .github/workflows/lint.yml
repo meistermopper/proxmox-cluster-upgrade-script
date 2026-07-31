@@ -14,10 +14,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          additional_files: cluster-upgrade.sh
+        run: shellcheck cluster-upgrade.sh
 
       - name: Check Bash Syntax
         run: bash -n cluster-upgrade.sh
