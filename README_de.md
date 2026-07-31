@@ -135,3 +135,15 @@ bash ./cluster-upgrade.sh
 | `-d`   | `--dry-run`     | Simulation ohne echte Änderungen oder Reboots                 |
 | `-n`   | `--node NODE`   | Einzelne spezifische Node gezielt upgraden (IP oder Hostname) |
 | `-h`   | `--help`        | Zeigt die Hilfe-Meldung an                                    |
+
+---
+
+## Changelog
+
+Eine detaillierte Übersicht aller Änderungen und der Versionshistorie findest du in der **[CHANGELOG.md](CHANGELOG.md)** (bzw. für ältere Versionen in **[CHANGELOG_OLD.md](CHANGELOG_OLD.md)**).
+
+---
+
+## Lizenz
+
+MIT Lizenz. Freie Nutzung und Anpassung ausdrücklich erlaubt.

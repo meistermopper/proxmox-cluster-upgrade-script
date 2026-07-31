@@ -146,6 +146,12 @@ Use a specific configuration file:
 
 ---
 
+## Changelog
+
+For a detailed list of changes and version history, see **[CHANGELOG.md](CHANGELOG.md)** (or **[CHANGELOG_OLD.md](CHANGELOG_OLD.md)** for older releases).
+
+---
+
 ## License
 
 MIT License. Free to use and modify.
