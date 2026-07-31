@@ -207,6 +207,8 @@ get_nodename() {
     if [[ -z "$name" ]]; then
         return 1
     fi
+    echo "$name"
+}
 # Active maintenance state tracking for emergency signal cleanup
 CURRENT_MAINTENANCE_NODE=""
 CURRENT_MAINTENANCE_TARGET=""
@@ -248,10 +250,12 @@ enable_maintenance() {
         fi
 
         # Count active running QEMU VMs and LXC containers on target node
-        local running_vms running_cts
-        running_vms=$(run_ssh "$target" "qm list 2>/dev/null | grep -c 'running' || true")
-        running_cts=$(run_ssh "$target" "pct list 2>/dev/null | grep -c 'running' || true")
-        local total_running=$((running_vms + running_cts))
+        local running_vms running_cts total_running
+        running_vms=$(run_ssh "$target" "qm list 2>/dev/null | grep -c 'running' || true" | tr -cd '0-9')
+        running_cts=$(run_ssh "$target" "pct list 2>/dev/null | grep -c 'running' || true" | tr -cd '0-9')
+        running_vms="${running_vms:-0}"
+        running_cts="${running_cts:-0}"
+        total_running=$((running_vms + running_cts))
 
         if [[ $total_running -eq 0 ]]; then
             log "SUCCESS" "All guests successfully migrated off node '${nodename}'."
@@ -282,7 +286,8 @@ node_needs_update() {
     fi
 
     # Check via SSH if apt dist-upgrade has packages to install/upgrade or if reboot is required
-    if run_ssh "$target" "bash -c 'apt-get update >/dev/null 2>&1 && (apt-get --just-print dist-upgrade 2>/dev/null | grep -qE \"^(Inst|Conf)\" || [ -f /var/run/reboot-required ])'" >/dev/null 2>&1; then
+    local check_cmd="apt-get update >/dev/null 2>&1 && (apt-get --just-print dist-upgrade 2>/dev/null | grep -E '^(Inst|Conf)' >/dev/null 2>&1 || test -f /var/run/reboot-required)"
+    if run_ssh "$target" "$check_cmd" >/dev/null 2>&1; then
         log "INFO" "Updates or pending reboot detected for node '${nodename}' (${target}). Proceeding with upgrade..."
         return 0
     else
@@ -301,7 +306,18 @@ check_cluster_health() {
         return 0
     fi
 
-    local primary_node="${NODES[0]}"
+    local primary_node=""
+    for n in "${NODES[@]}"; do
+        if run_ssh "$n" "hostname" >/dev/null 2>&1; then
+            primary_node="$n"
+            break
+        fi
+    done
+
+    if [[ -z "$primary_node" ]]; then
+        log "ERROR" "Cluster Health Check FAILED. None of the target nodes (${NODES[*]}) are reachable via SSH!"
+        return 1
+    fi
 
     # Check Cluster Quorum Status
     log "INFO" "Checking cluster quorum status on '${primary_node}'..."
