@@ -4,6 +4,7 @@ Automated, safe, sequential upgrade script for Proxmox VE (PVE) clusters with Hi
 
 ## Features
 
+- **Smart Upgrade Mode**: Checks whether package updates or a reboot are actually required before enabling maintenance mode. If a node is already up to date, guest evacuation and node reboot are automatically skipped.
 - **HA Maintenance Mode Evacuation**: Enables node maintenance mode before upgrading (`ha-manager node-maintenance enable <node>`), allowing PVE HA to live-migrate VMs and LXCs off the node.
 - **Evacuation Monitoring**: Waits for running QEMU VMs and LXC containers to evacuate before proceeding.
 - **System Upgrades & Autoremove**: Executes `apt-get update`, `apt-get dist-upgrade -y`, and `apt-get autoremove -y`.
@@ -20,13 +21,21 @@ Automated, safe, sequential upgrade script for Proxmox VE (PVE) clusters with Hi
 
 ### Execution Location
 You can run this script from:
-1. One of your Proxmox cluster nodes (e.g., Node 1).
-2. A central management/bastion server (e.g. Ansible host or admin workstation) with network access to all nodes.
+1. **A central management/bastion server / admin workstation (Recommended)** with SSH access to all cluster nodes.
+2. **One of your Proxmox cluster nodes (e.g., Node 1)**:
+   > **Important Note:** If running directly on a node that is listed inside the `NODES` array, the script process will be terminated when that node reboots. In this case, place the host node at the **very end** of the `NODES` array or run the script from an external host / HA VM.
 
-### Prerequisites
-- SSH key authentication set up for `root` (or sudoer) access across all cluster nodes without password prompts.
-- `curl` installed on the host running the script.
-- Proxmox VE HA configured (for automatic guest evacuation during maintenance mode).
+### SSH & Sudo Prerequisites
+- **SSH Key Authentication**: Public key login without password prompts set up on all target nodes.
+- **User Privileges**:
+  - **Option A (`root` - Default)**: `SSH_USER="root"` in `config.env`. SSH key placed in `/root/.ssh/authorized_keys` across all nodes.
+  - **Option B (Non-Root Sudo User, e.g. `thomas`)**: `SSH_USER="thomas"` and `USE_SUDO=true` in `config.env`.
+    The user must be configured on all target nodes in `/etc/sudoers.d/<username>` with passwordless sudo:
+    ```bash
+    thomas ALL=(ALL) NOPASSWD: ALL
+    ```
+- `curl` installed on the host running the script (for notifications).
+- Proxmox VE HA configured (for automatic live-migration during maintenance mode).
 
 ---
 
@@ -51,7 +60,13 @@ You can run this script from:
 4. Edit `config.env` with your cluster details:
    ```bash
    NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
-   
+
+   # SSH Settings
+   SSH_USER="thomas"        # 'root' or a sudo-enabled user
+   USE_SUDO=true           # Set to 'true' if SSH_USER is non-root (requires NOPASSWD in sudoers)
+   SSH_PORT="22"
+   SSH_KEY_PATH=""         # Path to SSH key or leave empty for default SSH agent
+
    # Enable Gotify (optional)
    GOTIFY_ENABLED=true
    GOTIFY_URL="https://gotify.yourdomain.com"
@@ -67,16 +82,26 @@ You can run this script from:
 
 ## Usage
 
-### Dry-Run Test
+For a detailed quickstart guide, see **[docs/QUICKSTART_en.md](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/docs/QUICKSTART_en.md)**.
+
+### Windows 1-Click Batch Files (In Explorer)
+- **[dry-run.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/dry-run.bat)**: Double-click to run dry-run simulation.
+- **[run-upgrade.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/run-upgrade.bat)**: Double-click to execute full cluster upgrade (with prompt confirmation).
+
+---
+
+### Terminal (PowerShell / Git Bash)
+
+#### Dry-Run Test
 Run in dry-run mode to verify SSH connectivity and script flow without making changes:
 ```bash
-./cluster-upgrade.sh --dry-run
+bash ./cluster-upgrade.sh --dry-run
 ```
 
-### Full Cluster Upgrade
+#### Full Cluster Upgrade
 Run the automated upgrade across all configured nodes:
 ```bash
-./cluster-upgrade.sh
+bash ./cluster-upgrade.sh
 ```
 
 ### Custom Config File

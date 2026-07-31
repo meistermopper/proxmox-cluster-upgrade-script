@@ -4,8 +4,9 @@ Automatisierte, sichere und sequenzielle Upgrade-Lösung für Proxmox VE (PVE) C
 
 ## Funktionen
 
+- **Intelligente Vorab-Prüfung (Smart Upgrade)**: Prüft vor dem Evakuieren und Neustarten, ob auf der Node tatsächlich ausstehende Updates oder ein erforderlicher Reboot vorliegen. Ist die Node bereits aktuell, werden Evakuierung und Reboot automatisch übersprungen.
 - **HA Wartungsmodus & Evakuierung**: Versetzt jede Node vor dem Upgrade in den Wartungsmodus (`ha-manager node-maintenance enable <node>`), sodass PVE HA alle VMs und LXC-Container automatisch auf andere Nodes migriert.
-- **Evakuierungs-Überwachung**: Prpüft aktiv, ob alle laufenden QEMU-VMs und LXC-Container die Node verlassen haben.
+- **Evakuierungs-Überwachung**: Prüft aktiv, ob alle laufenden QEMU-VMs und LXC-Container die Node verlassen haben.
 - **System-Upgrade & Cleanup**: Führt `apt-get update`, `apt-get dist-upgrade -y` und `apt-get autoremove -y` aus.
 - **Sicherer Reboot & Quorum-Check**: Rebootet die Node und wartet, bis die Node wieder erreichbar ist und den Cluster-Quorum-Status (`pvecm status`) erreicht hat.
 - **Automatische Freigabe**: Deaktiviert den Wartungsmodus nach erfolgreichem Reboot wieder.
@@ -20,13 +21,21 @@ Automatisierte, sichere und sequenzielle Upgrade-Lösung für Proxmox VE (PVE) C
 
 ### Ausführungsort
 Das Skript kann wahlweise ausgeführt werden von:
-1. Einer der Proxmox-Cluster-Nodes (z. B. Node 1).
-2. Einem zentralen Verwaltungs-Server (z. B. Ansible-Host oder Admin-PC) mit SSH-Zugriff auf alle Cluster-Nodes.
+1. **Einem zentralen Verwaltungs-Server / Admin-PC (Empfohlen)** mit SSH-Zugriff auf alle Cluster-Nodes.
+2. **Einer der Proxmox-Cluster-Nodes (z. B. Node 1)**:
+   > **Wichtiger Hinweis:** Wenn das Skript direkt auf einer Node ausgeführt wird, die sich im `NODES`-Array befindet, wird der Prozess während des Reboots dieser Node vom Betriebssystem beendet. Trage in diesem Fall die ausführende Node an die **letzte Stelle** in `NODES` ein oder verwende einen externen Host / eine HA-VM.
 
-### Anforderungen
-- SSH-Key-Authentifizierung für den `root`-Benutzer (oder Sudoer) auf allen Cluster-Nodes ohne Passwortabfrage.
-- `curl` auf dem ausführenden System installiert.
-- Proxmox VE HA konfiguriert (für automatische Migration im Maintenance Mode).
+### SSH- & Sudo-Anforderungen
+- **SSH-Key-Authentifizierung**: SSH-Public-Key-Login ohne Passwortabfrage auf allen Ziel-Nodes eingerichtet.
+- **Benutzerrechte**:
+  - **Option A (`root` - Standard)**: `SSH_USER="root"` in `config.env`. SSH-Key in `/root/.ssh/authorized_keys` auf allen Nodes.
+  - **Option B (Non-Root User mit Sudo, z. B. `thomas`)**: `SSH_USER="thomas"` und `USE_SUDO=true` in `config.env`.
+    Der Benutzer muss auf allen Ziel-Nodes in `/etc/sudoers.d/<username>` mit passwortlosem Sudo konfiguriert sein:
+    ```bash
+    thomas ALL=(ALL) NOPASSWD: ALL
+    ```
+- `curl` auf dem ausführenden System installiert (für Benachrichtigungen).
+- Proxmox VE HA konfiguriert (für automatische Live-Migration im Maintenance Mode).
 
 ---
 
@@ -48,10 +57,16 @@ Das Skript kann wahlweise ausgeführt werden von:
    cp config.env.example config.env
    ```
 
-4. `config.env` bearbeiten und deine Nodes sowie Webhooks eintragen:
+4. `config.env` bearbeiten und deine Nodes, SSH-Einstellungen sowie Webhooks eintragen:
    ```bash
    NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
-   
+
+   # SSH-Einstellungen
+   SSH_USER="thomas"        # 'root' oder ein Sudo-Benutzer
+   USE_SUDO=true           # Auf 'true' setzen, wenn SSH_USER kein root ist (erfordert NOPASSWD in sudoers)
+   SSH_PORT="22"
+   SSH_KEY_PATH=""         # Pfad zum SSH-Key oder leer lassen für Standard-SSH-Agent
+
    # Gotify (optional)
    GOTIFY_ENABLED=true
    GOTIFY_URL="https://gotify.deinedomain.de"
@@ -65,18 +80,28 @@ Das Skript kann wahlweise ausgeführt werden von:
 
 ---
 
-## Befehle
+## Befehle & Ausführung
 
-### Trockenlauf (Dry-Run)
+Eine detaillierte Schnellanleitung findest du in **[docs/QUICKSTART_de.md](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/docs/QUICKSTART_de.md)**.
+
+### Windows 1-Klick-Hilfsskripte (Im Explorer)
+- **[dry-run.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/dry-run.bat)**: Startet den Trockenlauf per Doppelklick.
+- **[run-upgrade.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/run-upgrade.bat)**: Startet das echte Cluster-Upgrade mit Sicherheits-Bestätigung.
+
+---
+
+### Terminal (PowerShell / Git Bash)
+
+#### Trockenlauf (Dry-Run)
 Testet SSH-Verbindungen und den Ablauf ohne Ausführung von Upgrades oder Reboots:
 ```bash
-./cluster-upgrade.sh --dry-run
+bash ./cluster-upgrade.sh --dry-run
 ```
 
-### Vollständiges Cluster-Upgrade ausführen
+#### Vollständiges Cluster-Upgrade ausführen
 Startet den sequenziellen Upgrade-Prozess für alle konfigurierten Nodes:
 ```bash
-./cluster-upgrade.sh
+bash ./cluster-upgrade.sh
 ```
 
 ---

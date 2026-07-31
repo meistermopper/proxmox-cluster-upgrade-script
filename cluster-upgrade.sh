@@ -16,6 +16,8 @@ NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
 SSH_USER="root"
 SSH_PORT="22"
 SSH_KEY_PATH=""
+USE_SUDO=false
+SMART_UPGRADE=true
 
 EVACUATION_TIMEOUT=300
 EVACUATION_CHECK_INTERVAL=10
@@ -78,7 +80,7 @@ fi
 
 # SSH Options Builder
 get_ssh_opts() {
-    local opts=(-p "$SSH_PORT" -o "StrictHostKeyChecking=accept-new" -o "ConnectTimeout=10" -o "BatchMode=yes")
+    local opts=(-p "$SSH_PORT" -o "StrictHostKeyChecking=accept-new" -o "ConnectTimeout=10")
     if [[ -n "$SSH_KEY_PATH" ]]; then
         opts+=("-i" "$SSH_KEY_PATH")
     fi
@@ -93,12 +95,18 @@ run_ssh() {
     local ssh_opts
     read -r -a ssh_opts <<< "$(get_ssh_opts)"
 
+    local remote_cmd="$cmd"
+    if [[ "${USE_SUDO:-false}" == true ]]; then
+        remote_cmd="sudo $cmd"
+    fi
+
     if [[ "$DRY_RUN" == true ]]; then
-        echo "[DRY-RUN] SSH to ${SSH_USER}@${target}: ${cmd}"
+        echo "[DRY-RUN] SSH to ${SSH_USER}@${target}: ${remote_cmd}"
         return 0
     fi
 
-    ssh "${ssh_opts[@]}" "${SSH_USER}@${target}" "$cmd"
+    # shellcheck disable=SC2029
+    ssh "${ssh_opts[@]}" "${SSH_USER}@${target}" "$remote_cmd"
 }
 
 # Notification Service
@@ -184,7 +192,10 @@ get_nodename() {
         return 0
     fi
     local name
-    name=$(run_ssh "$target" "hostname")
+    name=$(run_ssh "$target" "hostname" 2>/dev/null | tr -d '\r\n')
+    if [[ -z "$name" ]]; then
+        return 1
+    fi
     echo "$name"
 }
 
@@ -229,6 +240,29 @@ enable_maintenance() {
     log "WARNING" "Evacuation timeout reached for node '${nodename}'. Active guests may remain."
     send_notification "WARNING" "Evacuation Timeout" "Node '${nodename}' (${target}) still has active guests after ${EVACUATION_TIMEOUT}s."
     return 0
+}
+
+# Check if Node has Pending Updates or Required Reboot
+node_needs_update() {
+    local target="$1"
+    local nodename="$2"
+
+    log "INFO" "Checking for available updates on node '${nodename}' (${target})..."
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log "INFO" "[DRY-RUN] Simulating package update check for '${nodename}' (assume updates available)."
+        return 0
+    fi
+
+    # Check via SSH if apt dist-upgrade has packages to install/upgrade or if reboot is required
+    if run_ssh "$target" "bash -c 'apt-get update >/dev/null 2>&1 && (apt-get --just-print dist-upgrade 2>/dev/null | grep -qE \"^(Inst|Conf)\" || [ -f /var/run/reboot-required ])'" >/dev/null 2>&1; then
+        log "INFO" "Updates or pending reboot detected for node '${nodename}' (${target}). Proceeding with upgrade..."
+        return 0
+    else
+        log "SUCCESS" "Node '${nodename}' (${target}) is already up to date. No reboot required. Skipping."
+        send_notification "INFO" "Node Up to Date" "Node '${nodename}' (${target}) is already up to date. Skipping evacuation & reboot."
+        return 1
+    fi
 }
 
 # Upgrade Node Packages
@@ -345,6 +379,14 @@ main() {
             failed_nodes+=("${target}")
             continue
         }
+
+        # 0. Smart check: Skip evacuation & reboot if node is already up to date
+        if [[ "${SMART_UPGRADE:-true}" == true ]]; then
+            if ! node_needs_update "$target" "$nodename"; then
+                success_count=$((success_count + 1))
+                continue
+            fi
+        fi
 
         # 1. Enable maintenance & wait for guest migration
         if ! enable_maintenance "$target" "$nodename"; then
