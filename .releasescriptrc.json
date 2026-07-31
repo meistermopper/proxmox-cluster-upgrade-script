@@ -1,0 +1,10 @@
+{
+  "changelog": {
+    "maxVersions": 5,
+    "archiveFile": "CHANGELOG_OLD.md"
+  },
+  "git": {
+    "commitMessage": "chore(release): v${version}",
+    "tagNames": "v${version}"
+  }
+}

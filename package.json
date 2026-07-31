@@ -1,0 +1,27 @@
+{
+  "name": "proxmox-cluster-upgrade-script",
+  "version": "1.0.0",
+  "description": "Automated sequential upgrade script for Proxmox VE clusters with HA maintenance mode and notifications",
+  "main": "cluster-upgrade.sh",
+  "scripts": {
+    "test:local": "bash -n cluster-upgrade.sh",
+    "release": "release-script"
+  },
+  "devDependencies": {
+    "@alcalzone/release-script": "^3.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dein-username/proxmox-cluster-upgrade-script.git"
+  },
+  "keywords": [
+    "proxmox",
+    "proxmox-ve",
+    "pve",
+    "cluster",
+    "upgrade",
+    "ha-maintenance",
+    "bash"
+  ],
+  "license": "MIT"
+}
