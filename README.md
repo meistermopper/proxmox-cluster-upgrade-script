@@ -1,7 +1,7 @@
 # Proxmox VE Cluster Upgrade Script
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
-[![ShellCheck CI](https://github.com/dein-username/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/dein-username/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
+[![ShellCheck CI](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
 [![Language: Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](cluster-upgrade.sh)
@@ -55,8 +55,8 @@ You can run this script from:
 1. Clone or download this repository:
 
    ```bash
-   git clone https://github.com/your-username/proxmox-cluster-upgrade.sh.git
-   cd proxmox-cluster-upgrade.sh
+   git clone https://github.com/meistermopper/proxmox-cluster-upgrade-script.git
+   cd proxmox-cluster-upgrade-script
    ```
 
 2. Make the script executable:
