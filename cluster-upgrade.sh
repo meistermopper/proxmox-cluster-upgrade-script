@@ -10,6 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/config.env"
 DRY_RUN=false
+SINGLE_NODE=""
 
 # Default settings (can be overridden by config.env)
 NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
@@ -42,6 +43,7 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   -c, --config FILE    Path to custom configuration file (default: ./config.env)
   -d, --dry-run        Simulate commands without executing changes/reboots
+  -n, --node NODE      Target a specific single node (IP or hostname)
   -h, --help           Show this help message and exit
 
 EOF
@@ -58,6 +60,10 @@ while [[ $# -gt 0 ]]; do
         -d|--dry-run)
             DRY_RUN=true
             shift 1
+            ;;
+        -n|--node)
+            SINGLE_NODE="$2"
+            shift 2
             ;;
         -h|--help)
             usage
@@ -76,6 +82,11 @@ if [[ -f "$CONFIG_FILE" ]]; then
     source "$CONFIG_FILE"
 else
     echo "[WARNING] Configuration file '$CONFIG_FILE' not found. Using script defaults."
+fi
+
+# Override NODES array if single node option (-n/--node) was passed
+if [[ -n "$SINGLE_NODE" ]]; then
+    NODES=("$SINGLE_NODE")
 fi
 
 # SSH Options Builder
@@ -265,6 +276,35 @@ node_needs_update() {
     fi
 }
 
+# Perform Pre-Flight Cluster Health Check before upgrade workflow
+check_cluster_health() {
+    log "INFO" "Performing Pre-Flight Cluster Health Check..."
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log "INFO" "[DRY-RUN] Simulating Cluster Pre-Flight Health Check (Quorum: OK, HA Manager: OK)."
+        return 0
+    fi
+
+    local primary_node="${NODES[0]}"
+
+    # Check Cluster Quorum Status
+    log "INFO" "Checking cluster quorum status on '${primary_node}'..."
+    if ! run_ssh "$primary_node" "pvecm status" >/dev/null 2>&1; then
+        log "ERROR" "Cluster Quorum Check FAILED on '${primary_node}'. Cluster is not quorate or unreachable!"
+        return 1
+    fi
+
+    # Check HA Manager status for active error states
+    log "INFO" "Checking HA manager status on '${primary_node}'..."
+    if run_ssh "$primary_node" "ha-manager status 2>/dev/null | grep -iE '(error|fence|failed)'" >/dev/null 2>&1; then
+        log "ERROR" "HA Manager Health Check FAILED. One or more HA services are in an error state!"
+        return 1
+    fi
+
+    log "SUCCESS" "Cluster Pre-Flight Health Check PASSED (Quorum: OK, HA Manager: OK)."
+    return 0
+}
+
 # Upgrade Node Packages
 upgrade_node() {
     local target="$1"
@@ -357,10 +397,20 @@ main() {
     log "INFO" "=================================================="
     log "INFO" "Starting Proxmox VE Cluster Upgrade Workflow"
     log "INFO" "Target Nodes: ${NODES[*]}"
+    if [[ -n "$SINGLE_NODE" ]]; then
+        log "INFO" "Single Node Mode Enabled: Targeting '${SINGLE_NODE}'"
+    fi
     if [[ "$DRY_RUN" == true ]]; then
         log "WARNING" "DRY-RUN MODE ENABLED - No changes or reboots will be executed."
     fi
     log "INFO" "=================================================="
+
+    # Perform Cluster Pre-Flight Health Check
+    if ! check_cluster_health; then
+        log "ERROR" "Aborting upgrade workflow due to failed Pre-Flight Cluster Health Check."
+        send_notification "ERROR" "Pre-Flight Check Failed" "Aborting cluster upgrade. Cluster quorum lost or HA services in error state!"
+        return 1
+    fi
 
     send_notification "INFO" "Cluster Upgrade Started" "Starting automated cluster upgrade for nodes: ${NODES[*]}"
 

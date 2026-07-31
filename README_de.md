@@ -1,10 +1,18 @@
 # Proxmox VE Cluster Upgrade Script (Deutsch)
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![ShellCheck CI](https://github.com/dein-username/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/dein-username/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
+[![Language: Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](cluster-upgrade.sh)
+
 Automatisierte, sichere und sequenzielle Upgrade-Lösung für Proxmox VE (PVE) Cluster mit High-Availability (HA) Wartungsmodus, Live-Evakuierung von VMs/LXCs, Systemupdates (`dist-upgrade`), automatischem Aufräumen (`autoremove`), Reboots und Benachrichtigungen via Gotify & Telegram.
 
 ## Funktionen
 
+- **Cluster Pre-Flight Health Check**: Führt vor dem Upgrade aller Nodes eine automatische Gesundheitsprüfung durch (Quorum-Check via `pvecm status` und HA-Fehlerprüfung via `ha-manager status`). Bricht bei Problemen ab, um die Cluster-Stabilität zu schützen.
 - **Intelligente Vorab-Prüfung (Smart Upgrade)**: Prüft vor dem Evakuieren und Neustarten, ob auf der Node tatsächlich ausstehende Updates oder ein erforderlicher Reboot vorliegen. Ist die Node bereits aktuell, werden Evakuierung und Reboot automatisch übersprungen.
+- **Einzel-Node-Upgrade (`--node`)**: Ermöglicht die gezielte Aktualisierung einer einzelnen spezifischen Node im Cluster.
 - **HA Wartungsmodus & Evakuierung**: Versetzt jede Node vor dem Upgrade in den Wartungsmodus (`ha-manager node-maintenance enable <node>`), sodass PVE HA alle VMs und LXC-Container automatisch auf andere Nodes migriert.
 - **Evakuierungs-Überwachung**: Prüft aktiv, ob alle laufenden QEMU-VMs und LXC-Container die Node verlassen haben.
 - **System-Upgrade & Cleanup**: Führt `apt-get update`, `apt-get dist-upgrade -y` und `apt-get autoremove -y` aus.
@@ -112,4 +120,5 @@ bash ./cluster-upgrade.sh
 | :--- | :--- | :--- |
 | `-c` | `--config FILE` | Pfad zu einer benutzerdefinierten `config.env` Datei |
 | `-d` | `--dry-run` | Simulation ohne echte Änderungen oder Reboots |
+| `-n` | `--node NODE` | Einzelne spezifische Node gezielt upgraden (IP oder Hostname) |
 | `-h` | `--help` | Zeigt die Hilfe-Meldung an |

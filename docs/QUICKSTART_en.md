@@ -32,6 +32,11 @@ bash ./cluster-upgrade.sh --dry-run
 bash ./cluster-upgrade.sh
 ```
 
+### Target Single Node Upgrade
+```powershell
+bash ./cluster-upgrade.sh --node 192.168.1.17
+```
+
 ### Custom Configuration File
 ```powershell
 bash ./cluster-upgrade.sh --config /path/to/your_config.env

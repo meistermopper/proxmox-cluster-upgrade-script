@@ -32,6 +32,11 @@ bash ./cluster-upgrade.sh --dry-run
 bash ./cluster-upgrade.sh
 ```
 
+### Nur eine einzelne Node aktualisieren
+```powershell
+bash ./cluster-upgrade.sh --node 192.168.1.17
+```
+
 ### Mit benutzerdefinierter Konfigurationsdatei
 ```powershell
 bash ./cluster-upgrade.sh --config /pfad/zu/deiner_config.env
