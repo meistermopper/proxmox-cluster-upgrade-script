@@ -1,0 +1,10 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Force LF line endings for Shell scripts (CRLF breaks Linux execution)
+*.sh text eol=lf
+config.env.example text eol=lf
+
+# Force CRLF line endings for Windows Batch scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf

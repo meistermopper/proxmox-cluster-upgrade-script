@@ -1,0 +1,24 @@
+name: Lint Shell Scripts
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  shellcheck:
+    name: ShellCheck Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scripterrors: true
+          additional_files: cluster-upgrade.sh
+
+      - name: Check Bash Syntax
+        run: bash -n cluster-upgrade.sh
