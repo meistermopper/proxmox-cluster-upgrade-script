@@ -6,7 +6,8 @@ echo ==================================================
 echo.
 echo WARNING: This will upgrade packages and reboot all configured cluster nodes sequentially!
 echo.
-set /p CONFIRM="Are you sure you want to run the REAL upgrade? (y/N): "
+set "CONFIRM=y"
+set /p CONFIRM="Are you sure you want to run the REAL upgrade? (Y/n): "
 if /i "%CONFIRM%"=="y" (
     echo.
     echo Starting upgrade...

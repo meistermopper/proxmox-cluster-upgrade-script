@@ -89,9 +89,27 @@ if [[ -n "$SINGLE_NODE" ]]; then
     NODES=("$SINGLE_NODE")
 fi
 
+# Determine SSH Binary (prefer ssh.exe under Windows/Git Bash to leverage Windows SSH Agent)
+SSH_BINARY="ssh"
+if command -v ssh.exe >/dev/null 2>&1; then
+    SSH_BINARY="ssh.exe"
+fi
+
 # SSH Options Builder
 get_ssh_opts() {
     local opts=(-p "$SSH_PORT" -o "StrictHostKeyChecking=accept-new" -o "ConnectTimeout=10")
+    
+    # Enable ControlMaster multiplexing on Linux/macOS or MSYS ssh (skip for native Windows ssh.exe)
+    if [[ "$SSH_BINARY" != "ssh.exe" ]]; then
+        local cm_dir="${HOME}/.ssh/sockets"
+        mkdir -p "$cm_dir" 2>/dev/null || true
+        opts+=(
+            -o "ControlMaster=auto"
+            -o "ControlPath=${cm_dir}/cm-%r@%h-%p"
+            -o "ControlPersist=10m"
+        )
+    fi
+
     if [[ -n "$SSH_KEY_PATH" ]]; then
         opts+=("-i" "$SSH_KEY_PATH")
     fi
@@ -117,7 +135,7 @@ run_ssh() {
     fi
 
     # shellcheck disable=SC2029
-    ssh "${ssh_opts[@]}" "${SSH_USER}@${target}" "$remote_cmd"
+    "$SSH_BINARY" "${ssh_opts[@]}" "${SSH_USER}@${target}" "$remote_cmd"
 }
 
 # Notification Service
@@ -218,7 +236,7 @@ cleanup_on_interrupt() {
     log "WARNING" "Script execution interrupted by user (SIGINT/SIGTERM)."
     if [[ -n "$CURRENT_MAINTENANCE_NODE" ]] && [[ -n "$CURRENT_MAINTENANCE_TARGET" ]]; then
         log "WARNING" "Attempting emergency recovery: disabling HA maintenance mode on '${CURRENT_MAINTENANCE_NODE}' (${CURRENT_MAINTENANCE_TARGET})..."
-        run_ssh "$CURRENT_MAINTENANCE_TARGET" "ha-manager node-maintenance disable ${CURRENT_MAINTENANCE_NODE}" >/dev/null 2>&1 || true
+        run_ssh "$CURRENT_MAINTENANCE_TARGET" "ha-manager crm-command node-maintenance disable ${CURRENT_MAINTENANCE_NODE}" >/dev/null 2>&1 || true
     fi
     exit 1
 }
@@ -231,7 +249,7 @@ enable_maintenance() {
     local nodename="$2"
 
     log "INFO" "Enabling HA maintenance mode for node '${nodename}' (${target})..."
-    run_ssh "$target" "ha-manager node-maintenance enable ${nodename}" || {
+    run_ssh "$target" "ha-manager crm-command node-maintenance enable ${nodename}" || {
         log "ERROR" "Failed to enable HA maintenance mode on '${nodename}'."
         return 1
     }
@@ -415,7 +433,7 @@ disable_maintenance() {
     local nodename="$2"
 
     log "INFO" "Disabling HA maintenance mode for node '${nodename}' (${target})..."
-    run_ssh "$target" "ha-manager node-maintenance disable ${nodename}" || {
+    run_ssh "$target" "ha-manager crm-command node-maintenance disable ${nodename}" || {
         log "ERROR" "Failed to disable HA maintenance mode on '${nodename}'."
         return 1
     }

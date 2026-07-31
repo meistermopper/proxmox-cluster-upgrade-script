@@ -1,6 +1,6 @@
 # Proxmox VE Cluster Upgrade Script
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![ShellCheck CI](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
@@ -14,7 +14,7 @@ Automated, safe, sequential upgrade script for Proxmox VE (PVE) clusters with Hi
 - **Cluster Pre-Flight Health Check**: Automatically verifies cluster quorum (`pvecm status`) and HA service health (`ha-manager status`) before touching any nodes. Aborts immediately if the cluster is degraded.
 - **Smart Upgrade Mode**: Checks whether package updates or a reboot are actually required before enabling maintenance mode. If a node is already up to date, guest evacuation and node reboot are automatically skipped.
 - **Single Node Targeting (`--node`)**: Target a specific individual node for upgrade rather than the entire cluster.
-- **HA Maintenance Mode Evacuation**: Enables node maintenance mode before upgrading (`ha-manager node-maintenance enable <node>`), allowing PVE HA to live-migrate VMs and LXCs off the node.
+- **HA Maintenance Mode Evacuation**: Enables node maintenance mode before upgrading (`ha-manager crm-command node-maintenance enable <node>`), allowing PVE HA to live-migrate VMs and LXCs off the node.
 - **Evacuation Monitoring**: Waits for running QEMU VMs and LXC containers to evacuate before proceeding.
 - **System Upgrades & Autoremove**: Executes `apt-get update`, `apt-get dist-upgrade -y`, and `apt-get autoremove -y`.
 - **Safe Reboot & Quorum Wait**: Reboots the node and polls SSH reachability and cluster quorum (`pvecm status`) before resuming.
