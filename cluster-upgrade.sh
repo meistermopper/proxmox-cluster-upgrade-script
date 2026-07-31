@@ -207,8 +207,21 @@ get_nodename() {
     if [[ -z "$name" ]]; then
         return 1
     fi
-    echo "$name"
+# Active maintenance state tracking for emergency signal cleanup
+CURRENT_MAINTENANCE_NODE=""
+CURRENT_MAINTENANCE_TARGET=""
+
+cleanup_on_interrupt() {
+    echo ""
+    log "WARNING" "Script execution interrupted by user (SIGINT/SIGTERM)."
+    if [[ -n "$CURRENT_MAINTENANCE_NODE" ]] && [[ -n "$CURRENT_MAINTENANCE_TARGET" ]]; then
+        log "WARNING" "Attempting emergency recovery: disabling HA maintenance mode on '${CURRENT_MAINTENANCE_NODE}' (${CURRENT_MAINTENANCE_TARGET})..."
+        run_ssh "$CURRENT_MAINTENANCE_TARGET" "ha-manager node-maintenance disable ${CURRENT_MAINTENANCE_NODE}" >/dev/null 2>&1 || true
+    fi
+    exit 1
 }
+
+trap cleanup_on_interrupt SIGINT SIGTERM
 
 # Enable HA Maintenance Mode on Node
 enable_maintenance() {
@@ -220,6 +233,9 @@ enable_maintenance() {
         log "ERROR" "Failed to enable HA maintenance mode on '${nodename}'."
         return 1
     }
+
+    CURRENT_MAINTENANCE_NODE="$nodename"
+    CURRENT_MAINTENANCE_TARGET="$target"
 
     send_notification "INFO" "Maintenance Enabled" "HA maintenance mode enabled for node '${nodename}' (${target}). Evacuating guests..."
 
@@ -387,6 +403,9 @@ disable_maintenance() {
         log "ERROR" "Failed to disable HA maintenance mode on '${nodename}'."
         return 1
     }
+
+    CURRENT_MAINTENANCE_NODE=""
+    CURRENT_MAINTENANCE_TARGET=""
 
     log "SUCCESS" "HA maintenance mode disabled for node '${nodename}' (${target})."
     send_notification "SUCCESS" "Maintenance Disabled" "HA maintenance mode disabled for '${nodename}'. Guests can return."
