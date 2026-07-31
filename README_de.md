@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
 [![Language: Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](cluster-upgrade.sh)
+![Editor](https://img.shields.io/badge/Editor-Antigravity%20IDE-blueviolet?style=flat-square)
 
 Automatisierte, sichere und sequenzielle Upgrade-Lösung für Proxmox VE (PVE) Cluster mit High-Availability (HA) Wartungsmodus, Live-Evakuierung von VMs/LXCs, Systemupdates (`dist-upgrade`), automatischem Aufräumen (`autoremove`), Reboots und Benachrichtigungen via Gotify & Telegram.
 
@@ -28,12 +29,15 @@ Automatisierte, sichere und sequenzielle Upgrade-Lösung für Proxmox VE (PVE) C
 ## Voraussetzungen
 
 ### Ausführungsort
+
 Das Skript kann wahlweise ausgeführt werden von:
+
 1. **Einem zentralen Verwaltungs-Server / Admin-PC (Empfohlen)** mit SSH-Zugriff auf alle Cluster-Nodes.
 2. **Einer der Proxmox-Cluster-Nodes (z. B. Node 1)**:
    > **Wichtiger Hinweis:** Wenn das Skript direkt auf einer Node ausgeführt wird, die sich im `NODES`-Array befindet, wird der Prozess während des Reboots dieser Node vom Betriebssystem beendet. Trage in diesem Fall die ausführende Node an die **letzte Stelle** in `NODES` ein oder verwende einen externen Host / eine HA-VM.
 
 ### SSH- & Sudo-Anforderungen
+
 - **SSH-Key-Authentifizierung**: SSH-Public-Key-Login ohne Passwortabfrage auf allen Ziel-Nodes eingerichtet.
 - **Benutzerrechte**:
   - **Option A (`root` - Standard)**: `SSH_USER="root"` in `config.env`. SSH-Key in `/root/.ssh/authorized_keys` auf allen Nodes.
@@ -50,22 +54,26 @@ Das Skript kann wahlweise ausgeführt werden von:
 ## Einrichten & Nutzung
 
 1. Repository klonen oder Dateien herunterladen:
+
    ```bash
    git clone https://github.com/meistermopper/proxmox-cluster-upgrade-script.git
    cd proxmox-cluster-upgrade-script
    ```
 
 2. Ausführungsrechte vergeben:
+
    ```bash
    chmod +x cluster-upgrade.sh
    ```
 
 3. Konfigurationsdatei aus der Vorlage erstellen:
+
    ```bash
    cp config.env.example config.env
    ```
 
 4. `config.env` bearbeiten und deine Nodes, SSH-Einstellungen sowie Webhooks eintragen:
+
    ```bash
    NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
 
@@ -93,6 +101,7 @@ Das Skript kann wahlweise ausgeführt werden von:
 Eine detaillierte Schnellanleitung findest du in **[docs/QUICKSTART_de.md](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/docs/QUICKSTART_de.md)**.
 
 ### Windows 1-Klick-Hilfsskripte (Im Explorer)
+
 - **[dry-run.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/dry-run.bat)**: Startet den Trockenlauf per Doppelklick.
 - **[run-upgrade.bat](file:///c:/Users/thoma/dev/active/proxmox-cluster-upgrade-script/run-upgrade.bat)**: Startet das echte Cluster-Upgrade mit Sicherheits-Bestätigung.
 
@@ -101,13 +110,17 @@ Eine detaillierte Schnellanleitung findest du in **[docs/QUICKSTART_de.md](file:
 ### Terminal (PowerShell / Git Bash)
 
 #### Trockenlauf (Dry-Run)
+
 Testet SSH-Verbindungen und den Ablauf ohne Ausführung von Upgrades oder Reboots:
+
 ```bash
 bash ./cluster-upgrade.sh --dry-run
 ```
 
 #### Vollständiges Cluster-Upgrade ausführen
+
 Startet den sequenziellen Upgrade-Prozess für alle konfigurierten Nodes:
+
 ```bash
 bash ./cluster-upgrade.sh
 ```
@@ -116,9 +129,9 @@ bash ./cluster-upgrade.sh
 
 ## Commandline-Optionen
 
-| Option | Option (lang) | Beschreibung |
-| :--- | :--- | :--- |
-| `-c` | `--config FILE` | Pfad zu einer benutzerdefinierten `config.env` Datei |
-| `-d` | `--dry-run` | Simulation ohne echte Änderungen oder Reboots |
-| `-n` | `--node NODE` | Einzelne spezifische Node gezielt upgraden (IP oder Hostname) |
-| `-h` | `--help` | Zeigt die Hilfe-Meldung an |
+| Option | Option (lang)   | Beschreibung                                                  |
+| :----- | :-------------- | :------------------------------------------------------------ |
+| `-c`   | `--config FILE` | Pfad zu einer benutzerdefinierten `config.env` Datei          |
+| `-d`   | `--dry-run`     | Simulation ohne echte Änderungen oder Reboots                 |
+| `-n`   | `--node NODE`   | Einzelne spezifische Node gezielt upgraden (IP oder Hostname) |
+| `-h`   | `--help`        | Zeigt die Hilfe-Meldung an                                    |

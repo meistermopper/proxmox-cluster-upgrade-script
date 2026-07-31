@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
 [![Language: Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](cluster-upgrade.sh)
+![Editor](https://img.shields.io/badge/Editor-Antigravity%20IDE-blueviolet?style=flat-square)
 
 Automated, safe, sequential upgrade script for Proxmox VE (PVE) clusters with High Availability (HA) maintenance mode management, guest evacuation checks, package updates, autoremove cleanup, automatic reboots, and multi-channel notifications (Gotify & Telegram).
 
