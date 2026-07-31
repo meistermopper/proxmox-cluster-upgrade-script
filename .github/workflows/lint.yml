@@ -17,7 +17,6 @@ jobs:
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
-          scripterrors: true
           additional_files: cluster-upgrade.sh
 
       - name: Check Bash Syntax
