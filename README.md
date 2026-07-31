@@ -40,10 +40,10 @@ You can run this script from:
 - **SSH Key Authentication**: Public key login without password prompts set up on all target nodes.
 - **User Privileges**:
   - **Option A (`root` - Default)**: `SSH_USER="root"` in `config.env`. SSH key placed in `/root/.ssh/authorized_keys` across all nodes.
-  - **Option B (Non-Root Sudo User, e.g. `thomas`)**: `SSH_USER="thomas"` and `USE_SUDO=true` in `config.env`.
+  - **Option B (Non-Root Sudo User, e.g. `username`)**: `SSH_USER="username"` and `USE_SUDO=true` in `config.env`.
     The user must be configured on all target nodes in `/etc/sudoers.d/<username>` with passwordless sudo:
     ```bash
-    thomas ALL=(ALL) NOPASSWD: ALL
+    username ALL=(ALL) NOPASSWD: ALL
     ```
 - `curl` installed on the host running the script (for notifications).
 - Proxmox VE HA configured (for automatic live-migration during maintenance mode).
@@ -77,7 +77,7 @@ You can run this script from:
    NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
 
    # SSH Settings
-   SSH_USER="thomas"        # 'root' or a sudo-enabled user
+   SSH_USER="username"      # 'root' or a sudo-enabled user
    USE_SUDO=true           # Set to 'true' if SSH_USER is non-root (requires NOPASSWD in sudoers)
    SSH_PORT="22"
    SSH_KEY_PATH=""         # Path to SSH key or leave empty for default SSH agent

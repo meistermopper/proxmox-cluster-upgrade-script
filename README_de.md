@@ -37,10 +37,10 @@ Das Skript kann wahlweise ausgeführt werden von:
 - **SSH-Key-Authentifizierung**: SSH-Public-Key-Login ohne Passwortabfrage auf allen Ziel-Nodes eingerichtet.
 - **Benutzerrechte**:
   - **Option A (`root` - Standard)**: `SSH_USER="root"` in `config.env`. SSH-Key in `/root/.ssh/authorized_keys` auf allen Nodes.
-  - **Option B (Non-Root User mit Sudo, z. B. `thomas`)**: `SSH_USER="thomas"` und `USE_SUDO=true` in `config.env`.
+  - **Option B (Non-Root User mit Sudo, z. B. `username`)**: `SSH_USER="username"` und `USE_SUDO=true` in `config.env`.
     Der Benutzer muss auf allen Ziel-Nodes in `/etc/sudoers.d/<username>` mit passwortlosem Sudo konfiguriert sein:
     ```bash
-    thomas ALL=(ALL) NOPASSWD: ALL
+    username ALL=(ALL) NOPASSWD: ALL
     ```
 - `curl` auf dem ausführenden System installiert (für Benachrichtigungen).
 - Proxmox VE HA konfiguriert (für automatische Live-Migration im Maintenance Mode).
@@ -70,7 +70,7 @@ Das Skript kann wahlweise ausgeführt werden von:
    NODES=("192.168.1.7" "192.168.1.17" "192.168.1.27")
 
    # SSH-Einstellungen
-   SSH_USER="thomas"        # 'root' oder ein Sudo-Benutzer
+   SSH_USER="username"      # 'root' oder ein Sudo-Benutzer
    USE_SUDO=true           # Auf 'true' setzen, wenn SSH_USER kein root ist (erfordert NOPASSWD in sudoers)
    SSH_PORT="22"
    SSH_KEY_PATH=""         # Pfad zum SSH-Key oder leer lassen für Standard-SSH-Agent

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Emergency Signal Handler: Catches `SIGINT`/`SIGTERM` interrupts and automatically disables HA maintenance mode for node recovery.
 - Smart Upgrade mode (`SMART_UPGRADE`): Pre-checks package availability and pending reboot before guest evacuation.
 - Single node targeting (`-n`/`--node`): Upgrade specific individual nodes on demand.
-- Non-root SSH support (`USE_SUDO`): Enables execution with unprivileged SSH users (e.g. `thomas`) using passwordless sudo.
+- Non-root SSH support (`USE_SUDO`): Enables execution with unprivileged SSH users (e.g. `username`) using passwordless sudo.
 - Multi-channel notification support for Gotify and Telegram.
 - Windows 1-click execution helper batch files (`run-dryrun.bat`, `run-upgrade.bat`).
 - Detailed multilingual quickstart guides in German and English (`docs/QUICKSTART_de.md`, `docs/QUICKSTART_en.md`).
