@@ -1,0 +1,7 @@
+# Sensitive local configuration with API tokens / credentials
+config.env
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
