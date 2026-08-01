@@ -1,5 +1,7 @@
 # Proxmox VE Cluster Upgrade Script
 
+> **[🇩🇪 Deutsche Version dieser Dokumentation](README_de.md)**
+
 [![Version](https://img.shields.io/github/v/release/meistermopper/proxmox-cluster-upgrade-script?label=version&color=blue)](CHANGELOG.md)
 [![ShellCheck CI](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
