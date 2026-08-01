@@ -1,6 +1,6 @@
 # Proxmox VE Cluster Upgrade Script
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/github/v/release/meistermopper/proxmox-cluster-upgrade-script?label=version&color=blue)](CHANGELOG.md)
 [![ShellCheck CI](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml/badge.svg)](https://github.com/meistermopper/proxmox-cluster-upgrade-script/actions/workflows/lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-8.x_%7C_9.x-orange.svg)](https://www.proxmox.com)
