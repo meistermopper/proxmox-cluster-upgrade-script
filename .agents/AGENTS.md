@@ -9,4 +9,5 @@
 - This repository uses `@alcalzone/release-script` for versioning and releases (`npm run release`).
 - `CHANGELOG.md` must ALWAYS contain the placeholder header `## **WORK IN PROGRESS**` above the latest version section so that `@alcalzone/release-script` can process new release entries automatically.
 - New changes for an upcoming release must be documented as bullet points (under `### Added`, `### Fixed`, etc.) directly beneath `## **WORK IN PROGRESS**`.
+- After a release is published via `@alcalzone/release-script`, the `## **WORK IN PROGRESS**` header must be re-added to `CHANGELOG.md` above the newly created release section for the next cycle.
 
