@@ -5,10 +5,12 @@
   "main": "cluster-upgrade.sh",
   "scripts": {
     "test:local": "bash -n cluster-upgrade.sh",
-    "release": "release-script"
+    "release": "release-script",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "^3.8.0"
+    "@alcalzone/release-script": "^3.8.0",
+    "husky": "^9.1.7"
   },
   "repository": {
     "type": "git",

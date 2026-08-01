@@ -1,6 +1,9 @@
 # Sensitive local configuration with API tokens / credentials
 config.env
 
+# Dependencies
+node_modules/
+
 # Temporary files
 *.log
 *.tmp
