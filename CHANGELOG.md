@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## **WORK IN PROGRESS**
 
+### Added
+- Automated AI commit message hook via Gemini (`gemini-2.5-flash`) and Husky (`utils/ai-commit-hook.js`).
+
 ## [1.1.0] - 2026-07-31
 
 ### Added
