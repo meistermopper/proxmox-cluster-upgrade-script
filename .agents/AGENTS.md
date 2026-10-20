@@ -4,6 +4,14 @@
 - After completing code modifications or features, always prepare and suggest a formatted Conventional Commit command in English at the end of your response.
 - Use Conventional Commit tags like `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
 - Format the git commands in a ready-to-copy code block (e.g. `git add .` and `git commit -m "..."`).
+- **Co-Author Attribution:** All commits created or suggested with AI assistance must include the Git trailer:
+  ```git
+  Co-authored-by: Gemini <noreply@google.com>
+  ```
+  Example:
+  ```bash
+  git commit -m "feat: add cluster health check step" -m "Co-authored-by: Gemini <noreply@google.com>"
+  ```
 
 ## Release & Changelog Management
 - This repository uses `@alcalzone/release-script` for versioning and releases (`npm run release`).
