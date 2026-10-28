@@ -5,8 +5,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## **WORK IN PROGRESS**
+## 1.1.2 (2026-10-28)
 
 ### Fixed
 - Explicitly resolve Windows native OpenSSH (`/c/Windows/System32/OpenSSH/ssh.exe`) under Git Bash and WSL instead of MSYS2 `/usr/bin/ssh.exe` so the Windows SSH Agent is used without passphrase prompts.
