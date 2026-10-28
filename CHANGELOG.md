@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## **WORK IN PROGRESS**
 
 ### Fixed
+- Explicitly resolve Windows native OpenSSH (`/c/Windows/System32/OpenSSH/ssh.exe`) under Git Bash and WSL instead of MSYS2 `/usr/bin/ssh.exe` so the Windows SSH Agent is used without passphrase prompts.
 - Automatically prefer Windows native `curl.exe` when available and enforce connection timeouts (`--connect-timeout 5 --max-time 10`) for Gotify and Telegram notifications to prevent script hangs under WSL2.
 - Prefer Git Bash (`%ProgramFiles%\Git\bin\bash.exe`) over WSL `bash.exe` in `run-upgrade.bat` and `run-dryrun.bat`.
 

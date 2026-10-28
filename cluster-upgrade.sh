@@ -89,15 +89,23 @@ if [[ -n "$SINGLE_NODE" ]]; then
     NODES=("$SINGLE_NODE")
 fi
 
-# Determine SSH Binary (prefer ssh.exe under Windows/Git Bash to leverage Windows SSH Agent)
+# Determine SSH Binary (prefer Windows native OpenSSH to leverage Windows SSH Agent)
 SSH_BINARY="ssh"
-if command -v ssh.exe >/dev/null 2>&1; then
+if [[ -x "/c/Windows/System32/OpenSSH/ssh.exe" ]]; then
+    SSH_BINARY="/c/Windows/System32/OpenSSH/ssh.exe"
+elif [[ -x "/mnt/c/Windows/System32/OpenSSH/ssh.exe" ]]; then
+    SSH_BINARY="/mnt/c/Windows/System32/OpenSSH/ssh.exe"
+elif command -v ssh.exe >/dev/null 2>&1; then
     SSH_BINARY="ssh.exe"
 fi
 
-# Determine curl Binary (prefer curl.exe under Windows/WSL/Git Bash to leverage Windows network stack)
+# Determine curl Binary (prefer Windows native curl.exe to leverage Windows network stack)
 CURL_BINARY="curl"
-if command -v curl.exe >/dev/null 2>&1; then
+if [[ -x "/c/Windows/System32/curl.exe" ]]; then
+    CURL_BINARY="/c/Windows/System32/curl.exe"
+elif [[ -x "/mnt/c/Windows/System32/curl.exe" ]]; then
+    CURL_BINARY="/mnt/c/Windows/System32/curl.exe"
+elif command -v curl.exe >/dev/null 2>&1; then
     CURL_BINARY="curl.exe"
 fi
 
@@ -105,8 +113,8 @@ fi
 get_ssh_opts() {
     local opts=(-p "$SSH_PORT" -o "StrictHostKeyChecking=accept-new" -o "ConnectTimeout=10")
     
-    # Enable ControlMaster multiplexing on Linux/macOS or MSYS ssh (skip for native Windows ssh.exe)
-    if [[ "$SSH_BINARY" != "ssh.exe" ]]; then
+    # Enable ControlMaster multiplexing on Linux/macOS (skip for Windows ssh.exe)
+    if [[ "$SSH_BINARY" != *"ssh.exe" ]]; then
         local cm_dir="${HOME}/.ssh/sockets"
         mkdir -p "$cm_dir" 2>/dev/null || true
         opts+=(
