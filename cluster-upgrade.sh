@@ -95,6 +95,12 @@ if command -v ssh.exe >/dev/null 2>&1; then
     SSH_BINARY="ssh.exe"
 fi
 
+# Determine curl Binary (prefer curl.exe under Windows/WSL/Git Bash to leverage Windows network stack)
+CURL_BINARY="curl"
+if command -v curl.exe >/dev/null 2>&1; then
+    CURL_BINARY="curl.exe"
+fi
+
 # SSH Options Builder
 get_ssh_opts() {
     local opts=(-p "$SSH_PORT" -o "StrictHostKeyChecking=accept-new" -o "ConnectTimeout=10")
@@ -162,7 +168,7 @@ send_notification() {
         if [[ "$DRY_RUN" == true ]]; then
             echo "[DRY-RUN] Gotify Notification -> Priority: ${priority} | Title: ${full_title} | Msg: ${formatted_msg}"
         else
-            curl -s -f -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}" \
+            "$CURL_BINARY" -s -f --connect-timeout 5 --max-time 10 -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}" \
                 -H "Content-Type: application/json" \
                 -d "{\"title\": \"${full_title}\", \"message\": \"${formatted_msg}\", \"priority\": ${priority}}" > /dev/null || \
                 echo "[WARNING] Failed to send Gotify notification."
@@ -184,7 +190,7 @@ send_notification() {
         if [[ "$DRY_RUN" == true ]]; then
             echo "[DRY-RUN] Telegram Notification -> Title: ${full_title} | Msg: ${formatted_msg}"
         else
-            curl -s -f -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            "$CURL_BINARY" -s -f --connect-timeout 5 --max-time 10 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
                 -d "chat_id=${TELEGRAM_CHAT_ID}" \
                 -d "text=${tg_text}" \
                 -d "parse_mode=HTML" > /dev/null || \
